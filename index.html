@@ -170,12 +170,14 @@ HOW TO EMBED IN GOOGLE SITES
 
     // 2) Firebase imports
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
     import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
     // 3) Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    // Ensure session persists after redirect
+    try { await setPersistence(auth, browserLocalPersistence); } catch (e) { console.warn('persistence warn:', e.message); }
     const db = getFirestore(app);
 
     // 4) UI refs
@@ -229,6 +231,16 @@ HOW TO EMBED IN GOOGLE SITES
     });
     signOutBtn.addEventListener('click', async () => {
       await signOut(auth);
+    });
+
+    // Complete redirect result if returning from Google sign-in
+    getRedirectResult(auth).then((res) => {
+      if (res && res.user) {
+        console.log('Redirect sign-in completed for', res.user.email);
+      }
+    }).catch((e)=>{
+      console.warn('Redirect error:', e.message);
+      if (e.code === 'auth/unauthorized-domain') alert('Domain not authorized in Firebase Authentication settings.');
     });
 
     onAuthStateChanged(auth, async (user) => {
