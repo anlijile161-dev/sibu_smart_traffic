@@ -1,0 +1,21 @@
+{
+  "name": "Sibu Smart Traffic",
+  "short_name": "SST",
+  "start_url": "/sibu_smart_traffic/",
+  "scope": "/sibu_smart_traffic/",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    {
+      "src": "/sibu_smart_traffic/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/sibu_smart_traffic/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
