@@ -170,7 +170,7 @@ HOW TO EMBED IN GOOGLE SITES
 
     // 2) Firebase imports
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, signInWithPopup, onAuthStateChanged, signOut, getRedirectResult, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
     import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 
     // 3) Init
@@ -227,7 +227,14 @@ HOW TO EMBED IN GOOGLE SITES
     // 6) Auth
     const provider = new GoogleAuthProvider();
     signInBtn.addEventListener('click', async () => {
-      try { await signInWithRedirect(auth, provider); } catch (e) { alert(e.message); }
+      try {
+        // Try popup first (avoids Chrome bounce-tracking cleanup on interstitial domains)
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        console.warn('Popup sign-in failed, falling back to redirect:', e.code || e.message);
+        // Fallback to redirect if popup blocked or unsupported
+        await signInWithRedirect(auth, provider);
+      }
     });
     signOutBtn.addEventListener('click', async () => {
       await signOut(auth);
