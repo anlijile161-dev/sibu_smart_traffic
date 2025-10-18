@@ -1,0 +1,9 @@
+<!-- Add into <head> of your index.html (GitHub Pages path) -->
+<link rel="manifest" href="/sibu_smart_traffic/manifest.webmanifest">
+<meta name="theme-color" content="#0b1020">
+<link rel="apple-touch-icon" href="/sibu_smart_traffic/icons/icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sibu_smart_traffic/sw.js').catch(console.error);
+  }
+</script>
