@@ -114,9 +114,7 @@
 
           <div style="height:10px"></div>
           <label>Photo (optional)</label>
-          <input type="file" id="photoInput">
-          <span id="photoHint" style="color:#aaa; font-size:0.85em; margin-left:5px;"></span>
-          <button id="submitBtn">Submit report</button>
+          <input id="photo" type="file" accept="image/*" capture="environment" />
           <div id="previewBox" style="margin-top:8px"></div>
 
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">
@@ -207,16 +205,7 @@
     const countEl = document.getElementById('count');
     const pointsEl = document.getElementById('points');
     const mineOnlyEl = document.getElementById('mineOnly');
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-
-// 👉 就在这里加上提示逻辑
-if (!STORAGE_ENABLED) {
-  const fileInput = document.getElementById('photoInput');
-  const hint = document.getElementById('photoHint');
-  if (fileInput) fileInput.disabled = true;
-  if (hint) hint.textContent = 'Photo upload is temporarily disabled (Firebase Storage not enabled).';
-}
-
+    const exportCsvBtn = document.getElementById('exportCsv');
     const toggleHeatBtn = document.getElementById('toggleHeat');
     const photoInput = document.getElementById('photo');
     const previewBox = document.getElementById('previewBox');
