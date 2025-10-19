@@ -185,7 +185,8 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
     import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
     import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
-
+    
+    const STORAGE_ENABLED = false; // 先关闭，等你开通 Storage 再改 true
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -282,47 +283,57 @@
     });
 
     // 6) Submit report (with photo & default status)
-    submitBtn.addEventListener('click', async () => {
-      const user = auth.currentUser;
-      if (!user) return alert('Please sign in first.');
-      const type = typeSel.value;
-      const notes = (notesEl.value || '').trim();
-      if (notes.length > 400) return alert('Notes too long');
-      const {lat, lng} = marker.getLatLng();
+      submitBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (!user) return alert('Please sign in first.');
 
-      let photoURL = '';
-      const file = photoInput.files?.[0];
+    const type = typeSel.value;
+    const notes = (notesEl.value || '').trim();
+    if (notes.length > 400) return alert('Notes too long');
+
+    const { lat, lng } = marker.getLatLng();
+
+    let photoUrl = null;
+    const fileInput = document.getElementById('photoInput'); // 你的 <input type="file" id="photoInput">
+    const file = fileInput?.files?.[0];
+
+    if (STORAGE_ENABLED && file) {
       try {
-        if (file) {
-          if (file.size > 8*1024*1024) return alert('Image too large (>8MB)');
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-          const path = `reports_photos/${user.uid}/${Date.now()}_${safeName}`;
-          const ref = sRef(storage, path);
-          await uploadBytes(ref, file);
-          photoURL = await getDownloadURL(ref);
-        }
-        await addDoc(collection(db, 'reports'), {
-          uid: user.uid,
-          email: user.email || '',
-          author: user.displayName || user.email || 'Anonymous',
-          type, notes,
-          lat, lng,
-          photoURL,
-          status: 'Pending',
-          createdAt: serverTimestamp()
-        });
-        // points +5
-        const uref = doc(db, 'users', user.uid);
-        await updateDoc(uref, { points: increment(5) }).catch(async () => {
-          await setDoc(uref, { points: 5 }, { merge: true });
-        });
-        const snap = await getDoc(uref);
-        pointsEl.textContent = (snap.data()?.points ?? 0).toString();
+        const storage = getStorage(app);
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `reports_photos/${user.uid}/${Date.now()}.${ext}`;
+        const sref = ref(storage, path);
+        await uploadBytes(sref, file, { contentType: file.type });
+        photoUrl = await getDownloadURL(sref);
+      } catch (e) {
+        console.warn('Photo upload failed/disabled. Continue without photo.', e);
+        // 不抛错，继续保存文本报表
+      }
+    }
 
-        notesEl.value = ''; photoInput.value = ''; previewBox.innerHTML = '';
-        alert('Report submitted. Thank you!');
-      } catch (e) { alert(e.message); }
-    });
+    try {
+      await addDoc(collection(db, 'reports'), {
+        uid: user.uid,
+        author: user.displayName || user.email || 'Anonymous',
+        type, notes, lat, lng,
+        photoUrl: photoUrl || null,
+        createdAt: serverTimestamp()
+      });
+
+      // +5 分
+      const uref = doc(db, 'users', user.uid);
+      await updateDoc(uref, { points: increment(5) }).catch(async () => {
+        await setDoc(uref, { points: 5 }, { merge: true });
+      });
+
+      notesEl.value = '';
+      if (fileInput) fileInput.value = '';
+      alert('Report submitted. Thank you!');
+    } catch (e) {
+      alert('Submit failed: ' + e.message);
+    }
+  });
+</script>
 
     // 7) Live feed + filters + heatmap + status badge
     let heatLayer = null;
