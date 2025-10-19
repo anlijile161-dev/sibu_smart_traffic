@@ -1,1 +1,2 @@
-self.addEventListener('install', () => {console.log('SST Beta SW installed');});
+self.addEventListener('install', e => { self.skipWaiting(); });
+self.addEventListener('activate', e => { self.clients.claim(); });
