@@ -1,33 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sibu Smart Traffic — Beta</title>
-  <meta name="theme-color" content="#0b1020"/>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sibu Smart Traffic Beta+</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b1020">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <!-- Fonts & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
   <style>
-    :root{--bg:#0b1020;--card:#141a2c;--muted:#8892a6;--accent:#5eead4;--text:#e6edf5;--danger:#ff7b7b}
+    :root{--bg:#0b1020;--card:#141a2c;--muted:#8892a6;--accent:#5eead4;--text:#e6edf5;--danger:#ff7b7b;--ok:#34d399;--warn:#f59e0b}
     *{box-sizing:border-box}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#0b1020,#11162a);color:var(--text)}
     header{position:sticky;top:0;z-index:40;background:rgba(10,14,28,.7);backdrop-filter:blur(8px);border-bottom:1px solid #1f2942}
     .wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
     h1{font-size:clamp(20px,2.4vw,28px);margin:0;font-weight:700;letter-spacing:.3px}
     .tag{display:inline-block;font-size:12px;color:#0b1020;background:var(--accent);padding:3px 8px;border-radius:999px;margin-left:10px;font-weight:700}
-    .row{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin:18px 0}
+    .row{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin:18px 0}
     @media (max-width:900px){.row{grid-template-columns:1fr;}}
     .card{background:var(--card);border:1px solid #1f2942;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
     .card h2{margin:0 0 8px;font-size:18px}
     .card .body{padding:16px}
     .muted{color:var(--muted)}
     button,.btn{background:#26304f;color:#fff;border:1px solid #2f3a5d;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
-    button:hover{filter:brightness(1.1)}
+    button:hover{filter:brightness(1.07)}
     .btn-danger{background:#3a1f26;border-color:#652b35}
     .btn-accent{background:#0e2f2b;border-color:#2a5f57;color:#ccfff7}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#1a2136;border:1px solid #273154}
@@ -46,14 +53,21 @@
     .signin{display:flex;gap:10px;align-items:center}
     .avatar{width:28px;height:28px;border-radius:50%;border:1px solid #2b3556}
     .points{font-weight:700;color:var(--accent)}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #273154}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .b-pending{background:#332b12;color:#fcd34d;border:1px solid #f59e0b}
+    .b-progress{background:#0e2439;color:#60a5fa;border:1px solid #2563eb}
+    .b-resolved{background:#0f2e24;color:#6ee7b7;border:1px solid #34d399}
+    table.small td{padding:2px 6px;border-bottom:1px dashed #2a3354}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div>
-        <h1>Sibu Smart Traffic <span class="tag">Beta</span></h1>
-        <div class="muted" style="font-size:13px">Report unsafe behavior • See hotspots • Earn points for safe roads</div>
+        <h1>Sibu Smart Traffic Beta+ <span class="tag">Enhanced</span></h1>
+        <div class="muted" style="font-size:13px">Report unsafe behavior • Heatmap • Leaderboard • Photo upload • Status</div>
       </div>
       <div class="signin">
         <img id="avatar" class="avatar" alt=""/>
@@ -66,10 +80,11 @@
 
   <main class="wrap">
     <div class="row">
+      <!-- LEFT: Map + Form -->
       <section class="card">
         <div class="body">
           <h2>Drop a report</h2>
-          <p class="muted" style="margin-top:0">Drag the pin or use "Use my location". Only signed-in users can submit.</p>
+          <p class="muted" style="margin-top:0">Drag the pin or use "Use my location". Add a photo if useful. Only signed-in users can submit.</p>
           <div id="map"></div>
           <div style="height:8px"></div>
           <div class="grid">
@@ -92,9 +107,16 @@
               </div>
             </div>
           </div>
+
           <div style="height:10px"></div>
           <label>Notes (max 400 chars)</label>
           <textarea id="notes" placeholder="Eg: Motorcycles weaving across lanes near Jalan Wong Nai Siong lights"></textarea>
+
+          <div style="height:10px"></div>
+          <label>Photo (optional)</label>
+          <input id="photo" type="file" accept="image/*" capture="environment" />
+          <div id="previewBox" style="margin-top:8px"></div>
+
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px">
             <div class="pill small">Lat/Lng: <span id="latlng">—</span></div>
             <button id="submitBtn" class="btn-accent">Submit report</button>
@@ -102,20 +124,53 @@
         </div>
       </section>
 
+      <!-- RIGHT: Live feed & tools -->
       <section class="card">
         <div class="body">
-          <h2>Latest reports <span id="count" class="small muted"></span></h2>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <h2 style="margin-bottom:4px">Latest reports <span id="count" class="small muted"></span></h2>
+            <div class="toolbar">
+              <label class="small"><input type="checkbox" id="mineOnly"> Only my reports</label>
+              <button id="toggleHeat" title="Toggle heatmap">Heatmap</button>
+              <button id="exportCsv" title="Export CSV">Export CSV</button>
+            </div>
+          </div>
           <div class="feed" id="feed"></div>
           <div class="footer small">Signed-in points: <span class="points" id="points">0</span></div>
         </div>
       </section>
     </div>
+
+    <div class="row">
+      <!-- Leaderboard -->
+      <section class="card">
+        <div class="body">
+          <h2>Leaderboard (Top 10)</h2>
+          <div id="leaderboard" class="small muted">Loading…</div>
+        </div>
+      </section>
+      <!-- Stats by type/date -->
+      <section class="card">
+        <div class="body">
+          <h2>Stats</h2>
+          <div id="stats" class="small muted">Loading…</div>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Leaflet JS & Heat plugin -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
+  <!-- Firebase v10 (CDN Modular) -->
   <script type="module">
-    // Firebase config for your project (Web app credentials)
+    // 0) Register SW (scope: current folder)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
+
+    // 1) Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCHLxlEzLGC1gN1v0ryQe29acqb6IjM-YQ",
       authDomain: "sibu-smart-traffic.firebaseapp.com",
@@ -128,13 +183,15 @@
 
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    // UI refs
+    // 2) UI refs
     const signInBtn = document.getElementById('signInBtn');
     const signOutBtn = document.getElementById('signOutBtn');
     const userName = document.getElementById('userName');
@@ -146,85 +203,244 @@
     const latlngEl = document.getElementById('latlng');
     const countEl = document.getElementById('count');
     const pointsEl = document.getElementById('points');
+    const mineOnlyEl = document.getElementById('mineOnly');
+    const exportCsvBtn = document.getElementById('exportCsv');
+    const toggleHeatBtn = document.getElementById('toggleHeat');
+    const photoInput = document.getElementById('photo');
+    const previewBox = document.getElementById('previewBox');
+    const statsBox = document.getElementById('stats');
+    const leaderboardBox = document.getElementById('leaderboard');
 
-    // Map
+    // 3) Map
     const map = L.map('map').setView([2.287, 111.83], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'}).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
     let marker = L.marker(map.getCenter(), {draggable: true}).addTo(map);
-    function updateLatLngDisplay(){const {lat,lng}=marker.getLatLng(); latlngEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;}
-    marker.on('dragend', updateLatLngDisplay); updateLatLngDisplay();
-    document.getElementById('snapBtn').addEventListener('click', ()=>{marker.setLatLng(map.getCenter()); updateLatLngDisplay();});
-    document.getElementById('locateBtn').addEventListener('click', ()=>{
-      if(!navigator.geolocation) return alert('Geolocation not supported');
-      navigator.geolocation.getCurrentPosition(pos=>{
-        const {latitude,longitude}=pos.coords; map.setView([latitude,longitude],16); marker.setLatLng([latitude,longitude]); updateLatLngDisplay();
-      },()=>alert('Unable to get your location'));
+    function updateLatLngDisplay() {
+      const {lat, lng} = marker.getLatLng();
+      latlngEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+    marker.on('dragend', updateLatLngDisplay);
+    updateLatLngDisplay();
+
+    document.getElementById('snapBtn').addEventListener('click', () => {
+      marker.setLatLng(map.getCenter());
+      updateLatLngDisplay();
+    });
+    document.getElementById('locateBtn').addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation not supported');
+      navigator.geolocation.getCurrentPosition(pos => {
+        const {latitude, longitude} = pos.coords;
+        map.setView([latitude, longitude], 16);
+        marker.setLatLng([latitude, longitude]);
+        updateLatLngDisplay();
+      }, () => alert('Unable to get your location'));
     });
 
-    // Auth
+    // 4) Auth
     const provider = new GoogleAuthProvider();
-    signInBtn.addEventListener('click', async ()=>{ try{ await signInWithPopup(auth, provider); }catch(e){ alert(e.message);} });
-    signOutBtn.addEventListener('click', async ()=>{ await signOut(auth); });
+    signInBtn.addEventListener('click', async () => {
+      try { await signInWithPopup(auth, provider); } catch (e) { alert(e.message); }
+    });
+    signOutBtn.addEventListener('click', async () => { await signOut(auth); });
 
-    onAuthStateChanged(auth, async (user)=>{
-      if(user){
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
         userName.textContent = user.displayName || user.email;
         avatar.src = user.photoURL || '';
-        signInBtn.style.display='none'; signOutBtn.style.display='inline-block';
+        signInBtn.style.display = 'none';
+        signOutBtn.style.display = 'inline-block';
         const uref = doc(db, 'users', user.uid);
         const snap = await getDoc(uref);
-        if(!snap.exists()){ await setDoc(uref, { displayName: user.displayName||'', points: 0, createdAt: serverTimestamp() }); }
+        if (!snap.exists()) {
+          await setDoc(uref, { displayName: user.displayName || '', points: 0, createdAt: serverTimestamp() });
+        }
         const current = await getDoc(uref);
         pointsEl.textContent = (current.data()?.points ?? 0).toString();
-      }else{
+      } else {
         userName.textContent = 'Not signed in';
         avatar.removeAttribute('src');
-        signInBtn.style.display='inline-block'; signOutBtn.style.display='none';
-        pointsEl.textContent='0';
+        signInBtn.style.display = 'inline-block';
+        signOutBtn.style.display = 'none';
+        pointsEl.textContent = '0';
       }
     });
 
-    // Submit report
-    submitBtn.addEventListener('click', async ()=>{
+    // 5) Photo preview
+    photoInput.addEventListener('change', () => {
+      previewBox.innerHTML = '';
+      const f = photoInput.files?.[0];
+      if (f) {
+        const img = document.createElement('img');
+        img.className = 'thumb';
+        img.src = URL.createObjectURL(f);
+        previewBox.appendChild(img);
+      }
+    });
+
+    // 6) Submit report (with photo & default status)
+    submitBtn.addEventListener('click', async () => {
       const user = auth.currentUser;
-      if(!user) return alert('Please sign in first.');
+      if (!user) return alert('Please sign in first.');
       const type = typeSel.value;
-      const notes = (notesEl.value||'').trim();
-      if(notes.length>400) return alert('Notes too long');
-      const {lat,lng}=marker.getLatLng();
-      try{
-        await addDoc(collection(db,'reports'), {
-          uid:user.uid, author:user.displayName||user.email||'Anonymous', type, notes, lat, lng, createdAt: serverTimestamp()
+      const notes = (notesEl.value || '').trim();
+      if (notes.length > 400) return alert('Notes too long');
+      const {lat, lng} = marker.getLatLng();
+
+      let photoURL = '';
+      const file = photoInput.files?.[0];
+      try {
+        if (file) {
+          if (file.size > 8*1024*1024) return alert('Image too large (>8MB)');
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+          const path = `reports_photos/${user.uid}/${Date.now()}_${safeName}`;
+          const ref = sRef(storage, path);
+          await uploadBytes(ref, file);
+          photoURL = await getDownloadURL(ref);
+        }
+        await addDoc(collection(db, 'reports'), {
+          uid: user.uid,
+          email: user.email || '',
+          author: user.displayName || user.email || 'Anonymous',
+          type, notes,
+          lat, lng,
+          photoURL,
+          status: 'Pending',
+          createdAt: serverTimestamp()
         });
-        const uref = doc(db,'users',user.uid);
-        await updateDoc(uref,{points: increment(5)}).catch(async()=>{ await setDoc(uref,{points:5},{merge:true}); });
-        const snap = await getDoc(uref); pointsEl.textContent = (snap.data()?.points ?? 0).toString();
-        notesEl.value=''; alert('Report submitted. Thank you!');
-      }catch(e){ alert(e.message); }
+        // points +5
+        const uref = doc(db, 'users', user.uid);
+        await updateDoc(uref, { points: increment(5) }).catch(async () => {
+          await setDoc(uref, { points: 5 }, { merge: true });
+        });
+        const snap = await getDoc(uref);
+        pointsEl.textContent = (snap.data()?.points ?? 0).toString();
+
+        notesEl.value = ''; photoInput.value = ''; previewBox.innerHTML = '';
+        alert('Report submitted. Thank you!');
+      } catch (e) { alert(e.message); }
     });
 
-    // Live feed
-    const q = query(collection(db,'reports'), orderBy('createdAt','desc'), limit(20));
-    onSnapshot(q, (snapshot)=>{
-      countEl.textContent = `(${snapshot.size})`;
-      feed.innerHTML='';
-      snapshot.forEach(docu=>{
-        const d=docu.data();
-        const div=document.createElement('div'); div.className='item';
-        const dot=document.createElement('div'); dot.className='dot';
-        dot.style.background = d.type==='Illegal parking'?'#f59e0b': d.type==='Reckless driving'?'#ef4444':'#22d3ee';
-        const main=document.createElement('div');
+    // 7) Live feed + filters + heatmap + status badge
+    let heatLayer = null;
+    let latestDocs = [];
+    const baseQ = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(200));
+    onSnapshot(baseQ, (snapshot) => {
+      latestDocs = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+      renderFeed();
+      if (heatLayer && map.hasLayer(heatLayer)) drawHeat();
+      computeStats();
+      refreshLeaderboard();
+    });
+
+    function statusBadge(s){
+      if (s === 'Resolved') return '<span class="badge b-resolved">Resolved</span>';
+      if (s === 'In Progress') return '<span class="badge b-progress">In&nbsp;Progress</span>';
+      return '<span class="badge b-pending">Pending</span>';
+    }
+
+    function renderFeed(){
+      const user = auth.currentUser;
+      const rows = mineOnlyEl.checked && user
+        ? latestDocs.filter(d => d.uid === user.uid)
+        : latestDocs;
+
+      countEl.textContent = `(${rows.length})`;
+      feed.innerHTML = '';
+      rows.forEach(d => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.background = d.type === 'Illegal parking' ? '#f59e0b' : d.type === 'Reckless driving' ? '#ef4444' : '#22d3ee';
+        const main = document.createElement('div');
         const when = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
-        main.innerHTML = `<div class="type">${d.type}</div>
+        const img = d.photoURL ? `<div style="margin-top:6px"><img class="thumb" src="${d.photoURL}"/></div>` : '';
+        main.innerHTML = `<div class="type">${d.type} ${statusBadge(d.status||'Pending')}</div>
           <div class="small">${(d.notes||'').replace(/</g,'&lt;')}</div>
-          <div class="small">By ${d.author||'User'} • ${when.toLocaleString()} • (${d.lat?.toFixed?.(4)}, ${d.lng?.toFixed?.(4)})</div>`;
-        div.appendChild(dot); div.appendChild(main); feed.appendChild(div);
+          <div class="small">By ${d.author||'User'} • ${when.toLocaleString()} • (${d.lat?.toFixed?.(4)}, ${d.lng?.toFixed?.(4)})</div>
+          ${img}`;
+        div.appendChild(dot); div.appendChild(main);
+        feed.appendChild(div);
       });
+    }
+    mineOnlyEl.addEventListener('change', renderFeed);
+
+    function drawHeat(){
+      const pts = latestDocs.map(d => [d.lat, d.lng, 0.5]);
+      if (heatLayer) { map.removeLayer(heatLayer); }
+      heatLayer = L.heatLayer(pts, {radius: 22, blur: 18}).addTo(map);
+    }
+    toggleHeatBtn.addEventListener('click', () => {
+      if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+      else drawHeat();
     });
 
-    // Register service worker (optional)
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    // 8) Export CSV
+    exportCsvBtn.addEventListener('click', async () => {
+      try {
+        const user = auth.currentUser;
+        let qRef = collection(db, 'reports');
+        if (mineOnlyEl.checked && user) { qRef = query(qRef, where('uid', '==', user.uid)); }
+        const snap = await getDocs(qRef);
+        const rows = [];
+        rows.push(['type','notes','author','lat','lng','photoURL','status','createdAt']);
+        snap.forEach(d => {
+          const x = d.data();
+          const when = x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : '';
+          rows.push([x.type||'', (x.notes||'').replaceAll('"','""'), x.author||'', x.lat||'', x.lng||'', x.photoURL||'', x.status||'Pending', when]);
+        });
+        const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `sst_reports_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch (e) { alert(e.message); }
+    });
+
+    // 9) Stats & Leaderboard
+    function computeStats(){
+      const byType = {}, byDate = {};
+      latestDocs.forEach(d => {
+        byType[d.type] = (byType[d.type]||0)+1;
+        const dt = (d.createdAt?.toDate ? d.createdAt.toDate() : new Date()).toISOString().slice(0,10);
+        byDate[dt] = (byDate[dt]||0)+1;
+      });
+      const typeRows = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+      const dateRows = Object.entries(byDate).sort().map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+      statsBox.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="card" style="padding:10px">
+            <div style="font-weight:700;margin-bottom:6px">By type</div>
+            <table class="small" style="width:100%;border-collapse:collapse">${typeRows || '<tr><td colspan="2">No data</td></tr>'}</table>
+          </div>
+          <div class="card" style="padding:10px">
+            <div style="font-weight:700;margin-bottom:6px">By date</div>
+            <table class="small" style="width:100%;border-collapse:collapse">${dateRows || '<tr><td colspan="2">No data</td></tr>'}</table>
+          </div>
+        </div>`;
+    }
+
+    async function refreshLeaderboard(){
+      try {
+        // Fetch top users by points (client-side aggregate: read all user docs, then sort)
+        const usersSnap = await getDocs(collection(db, 'users'));
+        const arr = usersSnap.docs.map(d=>({id:d.id, ...(d.data()||{})})).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,10);
+        if (!arr.length) { leaderboardBox.textContent = 'No data'; return; }
+        const items = arr.map((u,i)=>`<div class="small" style="display:flex;gap:8px;align-items:center">
+          <span class="pill" style="min-width:34px;text-align:center">${i+1}</span>
+          <div style="flex:1">${(u.displayName||'User')}</div>
+          <div class="points">${u.points||0}</div>
+        </div>`).join('');
+        leaderboardBox.innerHTML = items;
+      } catch(e){
+        leaderboardBox.textContent = 'Failed to load leaderboard';
+      }
     }
   </script>
 </body>
