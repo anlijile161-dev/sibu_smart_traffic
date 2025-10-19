@@ -164,126 +164,126 @@
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
   <!-- Firebase v10 (CDN Modular) -->
-  <script type="module">
-    // 0) Register SW (scope: current folder)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(()=>{});
-    }
+<script type="module">
+  // 0) Register SW (scope: current folder)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
 
-    // 1) Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCHLxlEzLGC1gN1v0ryQe29acqb6IjM-YQ",
-      authDomain: "sibu-smart-traffic.firebaseapp.com",
-      projectId: "sibu-smart-traffic",
-      storageBucket: "sibu-smart-traffic.appspot.com",
-      messagingSenderId: "426450565021",
-      appId: "1:426450565021:web:6dc1dc2542d0046c11a174",
-      measurementId: "G-DPGSYE7LM8"
-    };
+  // 1) Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCHLxlEzLGC1gN1v0ryQe29acqb6IjM-YQ",
+    authDomain: "sibu-smart-traffic.firebaseapp.com",
+    projectId: "sibu-smart-traffic",
+    storageBucket: "sibu-smart-traffic.appspot.com",
+    messagingSenderId: "426450565021",
+    appId: "1:426450565021:web:6dc1dc2542d0046c11a174",
+    measurementId: "G-DPGSYE7LM8"
+  };
 
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
-    
-    const STORAGE_ENABLED = false; // 先关闭，等你开通 Storage 再改 true
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+  import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, doc, getDoc, setDoc, increment, updateDoc, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
 
-    // 2) UI refs
-    const signInBtn = document.getElementById('signInBtn');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const userName = document.getElementById('userName');
-    const avatar = document.getElementById('avatar');
-    const submitBtn = document.getElementById('submitBtn');
-    const feed = document.getElementById('feed');
-    const typeSel = document.getElementById('type');
-    const notesEl = document.getElementById('notes');
-    const latlngEl = document.getElementById('latlng');
-    const countEl = document.getElementById('count');
-    const pointsEl = document.getElementById('points');
-    const mineOnlyEl = document.getElementById('mineOnly');
-    const exportCsvBtn = document.getElementById('exportCsv');
-    const toggleHeatBtn = document.getElementById('toggleHeat');
-    const photoInput = document.getElementById('photo');
-    const previewBox = document.getElementById('previewBox');
-    const statsBox = document.getElementById('stats');
-    const leaderboardBox = document.getElementById('leaderboard');
+  const STORAGE_ENABLED = false; // 先关闭，等你开通 Storage 再改 true
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-    // 3) Map
-    const map = L.map('map').setView([2.287, 111.83], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  // 2) UI refs
+  const signInBtn = document.getElementById('signInBtn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const userName = document.getElementById('userName');
+  const avatar = document.getElementById('avatar');
+  const submitBtn = document.getElementById('submitBtn');
+  const feed = document.getElementById('feed');
+  const typeSel = document.getElementById('type');
+  const notesEl = document.getElementById('notes');
+  const latlngEl = document.getElementById('latlng');
+  const countEl = document.getElementById('count');
+  const pointsEl = document.getElementById('points');
+  const mineOnlyEl = document.getElementById('mineOnly');
+  const exportCsvBtn = document.getElementById('exportCsv');
+  const toggleHeatBtn = document.getElementById('toggleHeat');
+  const photoInput = document.getElementById('photo');
+  const previewBox = document.getElementById('previewBox');
+  const statsBox = document.getElementById('stats');
+  const leaderboardBox = document.getElementById('leaderboard');
 
-    let marker = L.marker(map.getCenter(), {draggable: true}).addTo(map);
-    function updateLatLngDisplay() {
-      const {lat, lng} = marker.getLatLng();
-      latlngEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    }
-    marker.on('dragend', updateLatLngDisplay);
+  // 3) Map
+  const map = L.map('map').setView([2.287, 111.83], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  let marker = L.marker(map.getCenter(), {draggable: true}).addTo(map);
+  function updateLatLngDisplay() {
+    const {lat, lng} = marker.getLatLng();
+    latlngEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+  marker.on('dragend', updateLatLngDisplay);
+  updateLatLngDisplay();
+
+  document.getElementById('snapBtn').addEventListener('click', () => {
+    marker.setLatLng(map.getCenter());
     updateLatLngDisplay();
-
-    document.getElementById('snapBtn').addEventListener('click', () => {
-      marker.setLatLng(map.getCenter());
+  });
+  document.getElementById('locateBtn').addEventListener('click', () => {
+    if (!navigator.geolocation) return alert('Geolocation not supported');
+    navigator.geolocation.getCurrentPosition(pos => {
+      const {latitude, longitude} = pos.coords;
+      map.setView([latitude, longitude], 16);
+      marker.setLatLng([latitude, longitude]);
       updateLatLngDisplay();
-    });
-    document.getElementById('locateBtn').addEventListener('click', () => {
-      if (!navigator.geolocation) return alert('Geolocation not supported');
-      navigator.geolocation.getCurrentPosition(pos => {
-        const {latitude, longitude} = pos.coords;
-        map.setView([latitude, longitude], 16);
-        marker.setLatLng([latitude, longitude]);
-        updateLatLngDisplay();
-      }, () => alert('Unable to get your location'));
-    });
+    }, () => alert('Unable to get your location'));
+  });
 
-    // 4) Auth
-    const provider = new GoogleAuthProvider();
-    signInBtn.addEventListener('click', async () => {
-      try { await signInWithPopup(auth, provider); } catch (e) { alert(e.message); }
-    });
-    signOutBtn.addEventListener('click', async () => { await signOut(auth); });
+  // 4) Auth
+  const provider = new GoogleAuthProvider();
+  signInBtn.addEventListener('click', async () => {
+    try { await signInWithPopup(auth, provider); } catch (e) { alert(e.message); }
+  });
+  signOutBtn.addEventListener('click', async () => { await signOut(auth); });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        userName.textContent = user.displayName || user.email;
-        avatar.src = user.photoURL || '';
-        signInBtn.style.display = 'none';
-        signOutBtn.style.display = 'inline-block';
-        const uref = doc(db, 'users', user.uid);
-        const snap = await getDoc(uref);
-        if (!snap.exists()) {
-          await setDoc(uref, { displayName: user.displayName || '', points: 0, createdAt: serverTimestamp() });
-        }
-        const current = await getDoc(uref);
-        pointsEl.textContent = (current.data()?.points ?? 0).toString();
-      } else {
-        userName.textContent = 'Not signed in';
-        avatar.removeAttribute('src');
-        signInBtn.style.display = 'inline-block';
-        signOutBtn.style.display = 'none';
-        pointsEl.textContent = '0';
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      userName.textContent = user.displayName || user.email;
+      avatar.src = user.photoURL || '';
+      signInBtn.style.display = 'none';
+      signOutBtn.style.display = 'inline-block';
+      const uref = doc(db, 'users', user.uid);
+      const snap = await getDoc(uref);
+      if (!snap.exists()) {
+        await setDoc(uref, { displayName: user.displayName || '', points: 0, createdAt: serverTimestamp() });
       }
-    });
+      const current = await getDoc(uref);
+      pointsEl.textContent = (current.data()?.points ?? 0).toString();
+    } else {
+      userName.textContent = 'Not signed in';
+      avatar.removeAttribute('src');
+      signInBtn.style.display = 'inline-block';
+      signOutBtn.style.display = 'none';
+      pointsEl.textContent = '0';
+    }
+  });
 
-    // 5) Photo preview
-    photoInput.addEventListener('change', () => {
-      previewBox.innerHTML = '';
-      const f = photoInput.files?.[0];
-      if (f) {
-        const img = document.createElement('img');
-        img.className = 'thumb';
-        img.src = URL.createObjectURL(f);
-        previewBox.appendChild(img);
-      }
-    });
+  // 5) Photo preview
+  photoInput.addEventListener('change', () => {
+    previewBox.innerHTML = '';
+    const f = photoInput.files?.[0];
+    if (f) {
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = URL.createObjectURL(f);
+      previewBox.appendChild(img);
+    }
+  });
 
-    // 6) Submit report (with photo & default status)
-      submitBtn.addEventListener('click', async () => {
+  // 6) Submit report (with photo & default status)
+  submitBtn.addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) return alert('Please sign in first.');
 
@@ -294,20 +294,17 @@
     const { lat, lng } = marker.getLatLng();
 
     let photoUrl = null;
-    const fileInput = document.getElementById('photoInput'); // 你的 <input type="file" id="photoInput">
-    const file = fileInput?.files?.[0];
+    const file = photoInput?.files?.[0];
 
     if (STORAGE_ENABLED && file) {
       try {
-        const storage = getStorage(app);
         const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
         const path = `reports_photos/${user.uid}/${Date.now()}.${ext}`;
-        const sref = ref(storage, path);
-        await uploadBytes(sref, file, { contentType: file.type });
-        photoUrl = await getDownloadURL(sref);
+        const ref = sRef(storage, path);
+        await uploadBytes(ref, file, { contentType: file.type });
+        photoUrl = await getDownloadURL(ref);
       } catch (e) {
         console.warn('Photo upload failed/disabled. Continue without photo.', e);
-        // 不抛错，继续保存文本报表
       }
     }
 
@@ -317,6 +314,7 @@
         author: user.displayName || user.email || 'Anonymous',
         type, notes, lat, lng,
         photoUrl: photoUrl || null,
+        status: 'Pending',
         createdAt: serverTimestamp()
       });
 
@@ -327,132 +325,131 @@
       });
 
       notesEl.value = '';
-      if (fileInput) fileInput.value = '';
+      photoInput.value = '';
+      previewBox.innerHTML = '';
       alert('Report submitted. Thank you!');
     } catch (e) {
       alert('Submit failed: ' + e.message);
     }
   });
-</script>
 
-    // 7) Live feed + filters + heatmap + status badge
-    let heatLayer = null;
-    let latestDocs = [];
-    const baseQ = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(200));
-    onSnapshot(baseQ, (snapshot) => {
-      latestDocs = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-      renderFeed();
-      if (heatLayer && map.hasLayer(heatLayer)) drawHeat();
-      computeStats();
-      refreshLeaderboard();
+  // 7) Live feed + filters + heatmap + status badge
+  let heatLayer = null;
+  let latestDocs = [];
+  const baseQ = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(200));
+  onSnapshot(baseQ, (snapshot) => {
+    latestDocs = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+    renderFeed();
+    if (heatLayer && map.hasLayer(heatLayer)) drawHeat();
+    computeStats();
+    refreshLeaderboard();
+  });
+
+  function statusBadge(s){
+    if (s === 'Resolved') return '<span class="badge b-resolved">Resolved</span>';
+    if (s === 'In Progress') return '<span class="badge b-progress">In&nbsp;Progress</span>';
+    return '<span class="badge b-pending">Pending</span>';
+  }
+
+  function renderFeed(){
+    const user = auth.currentUser;
+    const rows = mineOnlyEl.checked && user
+      ? latestDocs.filter(d => d.uid === user.uid)
+      : latestDocs;
+
+    countEl.textContent = `(${rows.length})`;
+    feed.innerHTML = '';
+    rows.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.background = d.type === 'Illegal parking' ? '#f59e0b' : d.type === 'Reckless driving' ? '#ef4444' : '#22d3ee';
+      const main = document.createElement('div');
+      const when = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
+      const img = d.photoUrl ? `<div style="margin-top:6px"><img class="thumb" src="${d.photoUrl}"/></div>` : '';
+      main.innerHTML = `<div class="type">${d.type} ${statusBadge(d.status||'Pending')}</div>
+        <div class="small">${(d.notes||'').replace(/</g,'&lt;')}</div>
+        <div class="small">By ${d.author||'User'} • ${when.toLocaleString()} • (${d.lat?.toFixed?.(4)}, ${d.lng?.toFixed?.(4)})</div>
+        ${img}`;
+      div.appendChild(dot); div.appendChild(main);
+      feed.appendChild(div);
     });
+  }
+  mineOnlyEl.addEventListener('change', renderFeed);
 
-    function statusBadge(s){
-      if (s === 'Resolved') return '<span class="badge b-resolved">Resolved</span>';
-      if (s === 'In Progress') return '<span class="badge b-progress">In&nbsp;Progress</span>';
-      return '<span class="badge b-pending">Pending</span>';
-    }
+  function drawHeat(){
+    const pts = latestDocs.map(d => [d.lat, d.lng, 0.5]);
+    if (heatLayer) { map.removeLayer(heatLayer); }
+    heatLayer = L.heatLayer(pts, {radius: 22, blur: 18}).addTo(map);
+  }
+  toggleHeatBtn.addEventListener('click', () => {
+    if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+    else drawHeat();
+  });
 
-    function renderFeed(){
+  // 8) Export CSV
+  exportCsvBtn.addEventListener('click', async () => {
+    try {
       const user = auth.currentUser;
-      const rows = mineOnlyEl.checked && user
-        ? latestDocs.filter(d => d.uid === user.uid)
-        : latestDocs;
-
-      countEl.textContent = `(${rows.length})`;
-      feed.innerHTML = '';
-      rows.forEach(d => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.style.background = d.type === 'Illegal parking' ? '#f59e0b' : d.type === 'Reckless driving' ? '#ef4444' : '#22d3ee';
-        const main = document.createElement('div');
-        const when = d.createdAt?.toDate ? d.createdAt.toDate() : new Date();
-        const img = d.photoURL ? `<div style="margin-top:6px"><img class="thumb" src="${d.photoURL}"/></div>` : '';
-        main.innerHTML = `<div class="type">${d.type} ${statusBadge(d.status||'Pending')}</div>
-          <div class="small">${(d.notes||'').replace(/</g,'&lt;')}</div>
-          <div class="small">By ${d.author||'User'} • ${when.toLocaleString()} • (${d.lat?.toFixed?.(4)}, ${d.lng?.toFixed?.(4)})</div>
-          ${img}`;
-        div.appendChild(dot); div.appendChild(main);
-        feed.appendChild(div);
+      let qRef = collection(db, 'reports');
+      if (mineOnlyEl.checked && user) { qRef = query(qRef, where('uid', '==', user.uid)); }
+      const snap = await getDocs(qRef);
+      const rows = [];
+      rows.push(['type','notes','author','lat','lng','photoUrl','status','createdAt']);
+      snap.forEach(d => {
+        const x = d.data();
+        const when = x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : '';
+        rows.push([x.type||'', (x.notes||'').replaceAll('"','""'), x.author||'', x.lat||'', x.lng||'', x.photoUrl||'', x.status||'Pending', when]);
       });
-    }
-    mineOnlyEl.addEventListener('change', renderFeed);
+      const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `sst_reports_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) { alert(e.message); }
+  });
 
-    function drawHeat(){
-      const pts = latestDocs.map(d => [d.lat, d.lng, 0.5]);
-      if (heatLayer) { map.removeLayer(heatLayer); }
-      heatLayer = L.heatLayer(pts, {radius: 22, blur: 18}).addTo(map);
-    }
-    toggleHeatBtn.addEventListener('click', () => {
-      if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
-      else drawHeat();
+  // 9) Stats & Leaderboard
+  function computeStats(){
+    const byType = {}, byDate = {};
+    latestDocs.forEach(d => {
+      byType[d.type] = (byType[d.type]||0)+1;
+      const dt = (d.createdAt?.toDate ? d.createdAt.toDate() : new Date()).toISOString().slice(0,10);
+      byDate[dt] = (byDate[dt]||0)+1;
     });
+    const typeRows = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+    const dateRows = Object.entries(byDate).sort().map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+    statsBox.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="card" style="padding:10px">
+          <div style="font-weight:700;margin-bottom:6px">By type</div>
+          <table class="small" style="width:100%;border-collapse:collapse">${typeRows || '<tr><td colspan="2">No data</td></tr>'}</table>
+        </div>
+        <div class="card" style="padding:10px">
+          <div style="font-weight:700;margin-bottom:6px">By date</div>
+          <table class="small" style="width:100%;border-collapse:collapse">${dateRows || '<tr><td colspan="2">No data</td></tr>'}</table>
+        </div>
+      </div>`;
+  }
 
-    // 8) Export CSV
-    exportCsvBtn.addEventListener('click', async () => {
-      try {
-        const user = auth.currentUser;
-        let qRef = collection(db, 'reports');
-        if (mineOnlyEl.checked && user) { qRef = query(qRef, where('uid', '==', user.uid)); }
-        const snap = await getDocs(qRef);
-        const rows = [];
-        rows.push(['type','notes','author','lat','lng','photoURL','status','createdAt']);
-        snap.forEach(d => {
-          const x = d.data();
-          const when = x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : '';
-          rows.push([x.type||'', (x.notes||'').replaceAll('"','""'), x.author||'', x.lat||'', x.lng||'', x.photoURL||'', x.status||'Pending', when]);
-        });
-        const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-        const blob = new Blob([csv], {type:'text/csv'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `sst_reports_${Date.now()}.csv`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      } catch (e) { alert(e.message); }
-    });
-
-    // 9) Stats & Leaderboard
-    function computeStats(){
-      const byType = {}, byDate = {};
-      latestDocs.forEach(d => {
-        byType[d.type] = (byType[d.type]||0)+1;
-        const dt = (d.createdAt?.toDate ? d.createdAt.toDate() : new Date()).toISOString().slice(0,10);
-        byDate[dt] = (byDate[dt]||0)+1;
-      });
-      const typeRows = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
-      const dateRows = Object.entries(byDate).sort().map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('');
-      statsBox.innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="card" style="padding:10px">
-            <div style="font-weight:700;margin-bottom:6px">By type</div>
-            <table class="small" style="width:100%;border-collapse:collapse">${typeRows || '<tr><td colspan="2">No data</td></tr>'}</table>
-          </div>
-          <div class="card" style="padding:10px">
-            <div style="font-weight:700;margin-bottom:6px">By date</div>
-            <table class="small" style="width:100%;border-collapse:collapse">${dateRows || '<tr><td colspan="2">No data</td></tr>'}</table>
-          </div>
-        </div>`;
+  async function refreshLeaderboard(){
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      const arr = usersSnap.docs.map(d=>({id:d.id, ...(d.data()||{})})).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,10);
+      if (!arr.length) { leaderboardBox.textContent = 'No data'; return; }
+      const items = arr.map((u,i)=>`<div class="small" style="display:flex;gap:8px;align-items:center">
+        <span class="pill" style="min-width:34px;text-align:center">${i+1}</span>
+        <div style="flex:1">${(u.displayName||'User')}</div>
+        <div class="points">${u.points||0}</div>
+      </div>`).join('');
+      leaderboardBox.innerHTML = items;
+    } catch(e){
+      leaderboardBox.textContent = 'Failed to load leaderboard';
     }
-
-    async function refreshLeaderboard(){
-      try {
-        // Fetch top users by points (client-side aggregate: read all user docs, then sort)
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const arr = usersSnap.docs.map(d=>({id:d.id, ...(d.data()||{})})).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,10);
-        if (!arr.length) { leaderboardBox.textContent = 'No data'; return; }
-        const items = arr.map((u,i)=>`<div class="small" style="display:flex;gap:8px;align-items:center">
-          <span class="pill" style="min-width:34px;text-align:center">${i+1}</span>
-          <div style="flex:1">${(u.displayName||'User')}</div>
-          <div class="points">${u.points||0}</div>
-        </div>`).join('');
-        leaderboardBox.innerHTML = items;
-      } catch(e){
-        leaderboardBox.textContent = 'Failed to load leaderboard';
-      }
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
